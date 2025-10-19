@@ -1,0 +1,249 @@
+# AI Usage Log
+
+This document tracks prompts given to an AI assistant and the corresponding responses.
+
+## Fields
+- Prompt: The exact user prompt.
+- AI Response: A brief summary or the delivered outcome.
+- AI Model: The AI system used.
+- Type: Category of interaction (e.g., Agent, Completion, Chat).
+- Date: ISO date (YYYY-MM-DD).
+
+## Entries
+
+| Prompt                                                                                                                                                                                                                  | AI Response     | AI Model                          | Type | Date |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|-----------------------------------|------|---|
+| "Style this ai_usage.md file in markdown format"                                                                                                                                                                        | Styled this file into a clean Markdown layout with sections and a tabular log. | GitHub Copilot - GPT-5            | Agent | 2025-10-18 |
+| "Format the link in the external_sources.md to match the harvard referencing style"                                                                                                                                     | Formatted the link to match the Harvard referencing style. | GitHub Copilot - GPT-5            | Agent | 2025-10-18 |
+| "Assess the current implementation logic; without providing the code, suggest ideas for implementation for sorting out used questions, topics, levels. Can the existing logic work if finished" Context: See Appendix B | See Appendix A. | GitHub Copilot - Claude Sonnet 4.5 | Ask (chat) | 2025-10-18 |
+| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D. | See Appendix C. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
+| "What's the javascript's euqivalent of python's sleep()?" | See Appendix E. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
+
+## Appendices
+
+### Appendix A
+
+```md
+Assessment of Current Implementation
+Issues with Existing Logic
+1. checkIfQuestionsExhausted
+The logic is inverted — it returns true if it finds any unused question, but the name suggests it should return true when questions are exhausted
+The nested loop exits early and doesn't properly check if all questions have been used
+2. appendUsedQuestion
+Uses the incorrectly-behaving checkIfQuestionsExhausted, so it won't append questions at the right time
+The condition logic seems backwards for typical "mark as used" behavior
+3. checkUsedTopic vs appendUsedTopic
+checkUsedTopic has no return statement for the false case
+appendUsedTopic checks if topic is already used, then only appends if topics aren't exhausted — this logic seems inverted
+4. checkIfTopicsExhausted
+Only checks length equality, which might not be sufficient if topics can be repeated or if the data structure differs
+5. General Design
+No handling for what happens when questions/topics are truly exhausted (reset? error?)
+Arrays use .push() but appendUsedTopic incorrectly uses .append() (not a JS array method)
+<hr></hr>
+Implementation Ideas
+Conceptual Improvements
+Track used items correctly:
+Maintain a "used" list that grows as items are consumed
+Check if an item is in the used list before selecting it
+When all items are used, either reset the list or flag exhaustion
+Separation of concerns:
+checkUsed*: returns boolean if item is already used
+markAsUsed*: adds item to used list (simpler than "append")
+isExhausted*: checks if used list length equals total available items
+getUnused*: returns items not yet used
+reset*: clears used list when exhausted
+Handle exhaustion gracefully:
+Option 1: Auto-reset used lists and start over
+Option 2: Throw/return an error state
+Option 3: Return a random item even if used (with a flag indicating repetition)
+Data structure considerations:
+Use Set instead of arrays for O(1) lookup performance
+Consider tracking used items per session/quiz instance
+Store metadata (timestamps, frequency) for smarter selection
+<hr></hr>
+Can the Existing Logic Work if Finished?
+Short answer: Partially, but it needs significant corrections.
+What's salvageable:
+The basic concept of tracking used items in arrays
+The modular function structure
+The check-before-append pattern
+What must be fixed:
+Reverse the logic in checkIfQuestionsExhausted and appendUsedQuestion
+Add proper return statements to checkUsedTopic
+Fix .append() to .push() in appendUsedTopic
+Rethink the condition logic in appendUsedTopic
+Add exhaustion handling (reset or error state)
+Recommended approach: Simplify the API to markAsUsed, isUsed, and hasUnused, then build higher-level selection logic on top of those primitives.
+```
+
+### Appendix B
+
+```js
+let appendUsedQuestion = (question, array, data) => {
+    if (checkIfQuestionsExhausted(array, data)) {
+        if (!checkUsedQuestion(question, array)) {
+            array.push(question);
+        }
+    }
+}
+
+let checkUsedQuestion = (question, array) => {
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] === question) {
+            return true;
+        }
+    }
+    return false;
+}
+
+let checkIfQuestionsExhausted = (array, data) => {
+    for (let i = 0; i < array.length; i++) {
+        for (let j = 0; j < data.length; j++) {
+            if (array[i] !== data[j]) {
+                return true;
+            }
+        }
+    }
+}
+
+let appendUsedTopic = (topic, array, data) => {
+    if (checkUsedTopic(topic, array)) {
+        if (!checkIfTopicsExhausted(array, data)) {
+            array.append(topic);
+        }
+    }
+}
+
+let checkUsedTopic = (topic, array) => {
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] === topic) {
+            return true;
+        }
+    }
+}
+
+let checkIfTopicsExhausted = (array, data) => {
+    if (array.length === data.length) {
+        return true;
+    }
+}
+
+let appendUsedLevel = (level, array) => {
+    array.push(level);
+}
+
+module.exports = { appendUsedQuestion, checkUsedQuestion, checkIfQuestionsExhausted, appendUsedTopic, checkUsedTopic, checkIfTopicsExhausted, appendUsedLevel };
+```
+
+### Appendix C
+
+```markdown
+questions
+  ├── easy: [array]
+  ├── medium: [array]  
+  └── hard: [array]
+
+Each level contains an array of topic objects
+```
+
+---
+
+**What you need:**
+
+1. **Access each level** (easy, medium, hard)
+2. **Check the length** of that level (how many topic objects)
+
+---
+
+**HINTS:**
+
+**Remember:**
+- You recently asked about `Object.keys()`, `Object.entries()` 💡
+- Each level (easy/medium/hard) = **an array**
+- Arrays have `.length` property
+
+**Logic:**
+1. Iterate through levels (`Object.keys(questions)` gives you `["easy", "medium", "hard"]`)
+2. For each level → `questions[level]` gives you the array
+3. `questions[level].length` gives the number of topics in that level
+
+---
+
+**Pseudocode (not real code):**
+```
+for each level in questions:
+  get topics array = questions[level]
+  length = array.length
+  print level + length
+```
+
+### Appendix D
+
+```js
+const questions = {
+    easy: [
+        {
+            topic: "Sports",
+            questions: [
+                'How long is a marathon?',
+                'What term is used in tennis for "40-40"?',
+                'What is the score of zero called in tennis?',
+                'How many rings are in the Olympic\'s logo?'
+            ],
+            answers: ['26.2 Miles', 'Deuce', 'Love', '5'],
+            options: [
+                ["28 Miles", "20 Miles", "27.2 Miles", "26.2 Miles"],
+                ["Love", "Tie-Break", "Deuce", "Ace"],
+                ["Zero", "Love", "Double Fault", "Nul Points"],
+                ["3", "7", "4", "5"]
+            ]
+        },
+```
+
+### Appendix E
+
+**JavaScript doesn't have a direct `sleep()` like Python!**
+
+---
+
+**Python:**
+```python
+import time
+time.sleep(5)  # pauses for 5 seconds
+```
+
+**JavaScript equivalent:**
+
+**Option 1: Using `setTimeout()` (callback-based):**
+```javascript
+setTimeout(() => {
+  console.log("After 5 seconds");
+}, 5000);
+```
+
+**Option 2: Using async/await (modern, cleaner):**
+```javascript
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Usage:
+await sleep(5000); // pause for 5 seconds
+console.log("After 5 seconds");
+```
+
+**Option 3: One-liner:**
+```javascript
+await new Promise(resolve => setTimeout(resolve, 5000));
+```
+
+---
+
+**Key difference:**
+- **Python's sleep():** Synchronous (blocks everything)
+- **JavaScript:** Asynchronous (doesn't block, uses event loop)
+
+**For your quiz app:** If you need delays (e.g., showing answer before next question), use the `async/await` approach.
+
+Need help integrating this into your code? 💪

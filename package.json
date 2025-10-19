@@ -1,0 +1,17 @@
+{
+  "name": "pythonproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "colorette": "^2.0.20",
+    "readline-sync": "^1.4.10"
+  }
+}
