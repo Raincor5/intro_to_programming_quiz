@@ -14,10 +14,11 @@ This document tracks prompts given to an AI assistant and the corresponding resp
 | Prompt                                                                                                                                                                                                                  | AI Response     | AI Model                          | Type | Date |
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|-----------------------------------|------|---|
 | "Style this ai_usage.md file in markdown format"                                                                                                                                                                        | Styled this file into a clean Markdown layout with sections and a tabular log. | GitHub Copilot - GPT-5            | Agent | 2025-10-18 |
-| "Format the link in the external_sources.md to match the harvard referencing style"                                                                                                                                     | Formatted the link to match the Harvard referencing style. | GitHub Copilot - GPT-5            | Agent | 2025-10-18 |
+| "Format the links in the external_sources.md to match the harvard referencing style"                                                                                                                                    | Formatted the link to match the Harvard referencing style. | GitHub Copilot - GPT-5            | Agent | 2025-10-18 |
 | "Assess the current implementation logic; without providing the code, suggest ideas for implementation for sorting out used questions, topics, levels. Can the existing logic work if finished" Context: See Appendix B | See Appendix A. | GitHub Copilot - Claude Sonnet 4.5 | Ask (chat) | 2025-10-18 |
-| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D. | See Appendix C. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
-| "What's the javascript's euqivalent of python's sleep()?" | See Appendix E. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
+| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D.                                                                                                                           | See Appendix C. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
+| "What's the javascript's euqivalent of python's sleep()?"                                                                                                                                                               | See Appendix E. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
+| "Help me debug the code. I assume there is a logical error with preserving indices." Context: See Appendix F. | See Appendix G. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
 
 ## Appendices
 
@@ -247,3 +248,194 @@ await new Promise(resolve => setTimeout(resolve, 5000));
 **For your quiz app:** If you need delays (e.g., showing answer before next question), use the `async/await` approach.
 
 Need help integrating this into your code? 💪
+
+### Appendix F
+
+```terminal
+/Users/raincor/PythonProject/quiz/quiz.js:104 options.forEach((option, index) => console.log(${index+1}. + option)); ^
+TypeError: Cannot read properties of undefined (reading 'forEach') at quiz (/Users/raincor/PythonProject/quiz/quiz.js:104:17) at async main (/Users/raincor/PythonProject/main.js:28:17)
+Node.js v24.2.0
+Process finished with exit code 1
+```
+
+```js
+const data = require('../data/data.js');
+const rl = require('readline-sync');
+
+// Notes
+// data structure: questions[level][topic].questions[index] OR questions.levelName[topic].questions[index]
+
+// Module imports
+const getRandomNumber = require('./utils/getRNG.js');
+const {getAllTopics, getAllLevels, getTopicByLevel, getOptionsForQuestion, validateAnswer, getQuestionsByTopic} = require("../data/dataManager");
+const delay = require('./utils/delay.js');
+const { markAsUsedQuestion, markAsUsedLevel,
+    markAsUsedTopic, validateUsedQuestion, validateUsedLevel,
+    validateUsedTopic, checkAllQuestionsUsedForTopic, checkAllQuestionsUsedForLevel, checkAllLevelsUsed,
+    usedQuestions, usedLevels, usedTopics} = require('./utils/checkUsed.js');
+const {getAvailableQuestions, getAvailableTopics, getAvailableLevels} = require("./utils/checkUsed");
+
+async function quiz() {
+    let isRunning = false;
+    console.log("Welcome to the quiz!");
+    await delay(1000);
+    console.clear();
+    console.log("Levels!");
+    await delay(1000);
+    console.clear();
+    for (const level of getAllLevels(data)) {
+        const index = getAllLevels(data).indexOf(level);
+        let funnyPhrases = ["This one!", "And another!", "And yet another!", "And a final one! (No?)"];
+        console.log(funnyPhrases[getRandomNumber(0, funnyPhrases.length - 1)]);
+        console.log(`${index + 1}. ${level}`);
+        await delay(1000);
+        console.clear();
+    }
+    console.log("Topics!");
+    await delay(1000);
+    console.clear();
+    for (const topic of getAllTopics(data)) {
+        const index = getAllTopics(data).indexOf(topic);
+        let funnyPhrases = ["This one!", "And another!", "And yet another!", "And a final one! (No?)"];
+        console.log(funnyPhrases[getRandomNumber(0, funnyPhrases.length - 1)]);
+        console.log(`${index + 1}. ${topic}`);
+        await delay(1000);
+        console.clear();
+    }
+    console.log("Let's start!");
+    await delay(1000);
+    console.clear();
+    isRunning = true;
+    while (isRunning) {
+        // check question pool - todo: implement
+        let availableLevels = getAvailableLevels(data);
+        let currentPlayer = "Player 1"; // placeholder
+        // show scores - todo: implement
+        console.log(availableLevels);
+        availableLevels.forEach(((level, index) => console.log(`${ index+1 }. ` + level)));
+        let level = rl.question("Choose a level: ");
+        level = parseInt(level);
+        if (level < 1 || level > availableLevels.length || isNaN(level)) {
+            console.log("Invalid level selected. Please try again.");
+            continue;
+        }
+        let selectedLevel = availableLevels[level-1];
+        let allLevels = getAllLevels(data);
+        let originalLevelIndex = -1;
+        for (let i = 0; i < allLevels.length; i++) {
+            if (allLevels[i] === selectedLevel) {
+                originalLevelIndex = i;
+                break;
+            }
+        }
+        let availableTopics = getAvailableTopics(data, originalLevelIndex);
+        availableTopics.forEach((topic, index) => console.log(`${index+1}. ` + topic));
+        let topic = rl.question("Choose a topic: ");
+        topic = parseInt(topic);
+        if (topic < 1 || topic > availableTopics.length || isNaN(topic)) {
+            console.log("Invalid topic selected. Please try again.");
+            continue;
+        }
+        let selectedTopic = availableTopics[topic-1];
+        let allTopicsForLevel = getTopicByLevel(data, originalLevelIndex);
+        let originalTopicIndex = -1;
+        for (let i = 0; i < allTopicsForLevel.length; i++) {
+            if (allTopicsForLevel[i] === selectedTopic) {
+                originalTopicIndex = i;
+                break;
+            }
+        }
+        let availableQuestions = getAvailableQuestions(data, level-1, originalTopicIndex);
+        let randomQuestionIndex = getRandomNumber(0, availableQuestions.length - 1);
+        let randomQuestion = availableQuestions[randomQuestionIndex];
+        console.log(randomQuestion);
+
+        // Find the original index in the full questions array
+        let allQuestionsForTopic = getQuestionsByTopic(data, selectedTopic);
+        let originalQuestionIndex = -1;
+        for (let i = 0; i < allQuestionsForTopic.length; i++) {
+            if (allQuestionsForTopic[i] === randomQuestion) {
+                originalQuestionIndex = i;
+                break;
+            }
+        }
+
+        let options = getOptionsForQuestion(data, availableLevels[originalLevelIndex], originalTopicIndex, originalQuestionIndex);
+        console.log(options);
+        options.forEach((option, index) => console.log(`${index+1}. ` + option));
+        let answer = rl.question("Choose an answer: ");
+        answer = parseInt(answer);
+        let validate = validateAnswer(data, getAllLevels(data)[originalLevelIndex], originalTopicIndex, originalQuestionIndex, answer-1);
+
+        if (validate) {
+            console.log("Correct!");
+            // Here goes the point addition
+        } else {
+            console.log("Wrong!");
+            // Here goes the point subtraction
+        }
+        markAsUsedQuestion(randomQuestion);
+        console.log("Next question!");
+        await delay(1000);
+        console.clear();
+    }
+};
+
+module.exports = quiz;
+```
+
+### Appendix G
+
+
+The problem is on line 104 where options is undefined. Looking at your code:
+
+```js
+let options = getOptionsForQuestion(data, availableLevels[originalLevelIndex], originalTopicIndex, originalQuestionIndex);
+```
+
+The issue is here: availableLevels[originalLevelIndex]
+You're using originalLevelIndex (which is the index in the full levels array) to access availableLevels (which is the filtered array). This causes an out-of-bounds access.
+The Fix:
+You should use selectedLevel directly instead:
+
+```js
+let options = getOptionsForQuestion(data, selectedLevel, originalTopicIndex, originalQuestionIndex);
+```
+
+Similarly, on the validation line:
+
+```js
+let validate = validateAnswer(data, selectedLevel, originalTopicIndex, originalQuestionIndex, answer-1);
+```
+
+The root cause: You correctly found originalLevelIndex for use with functions that need the original index, but then incorrectly used it to index into the filtered availableLevels array instead of using the selectedLevel string you already extracted.
+
+---
+
+Looking at your output, I can now see the actual problem. When you select level 1 from availableLevels which is ['medium', 'hard'], you get 'medium' (index 0 in the filtered array).
+But then you're using level-1 (which is 0) to get available questions:
+
+```js
+let availableQuestions = getAvailableQuestions(data, level-1, originalTopicIndex);
+```
+
+This level-1 should be originalLevelIndex instead:
+
+```js
+let availableQuestions = getAvailableQuestions(data, originalLevelIndex, originalTopicIndex);
+```
+
+The issue: You're using the filtered array position (level-1 = 0) instead of the original data position (originalLevelIndex = 1 for 'medium').
+The Fix:
+Change line 94 from:
+```js
+let availableQuestions = getAvailableQuestions(data, level-1, originalTopicIndex);
+```
+
+to:
+
+```js
+let availableQuestions = getAvailableQuestions(data, originalLevelIndex, originalTopicIndex);
+```
+
+This ensures you're passing the correct index that corresponds to the actual position in the original data structure.
