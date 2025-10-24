@@ -53,7 +53,9 @@ let getAnswersForQuestion = (data, level, topic, questionIndex) => {
 }
 
 let validateAnswer = (data, level, topic, questionIndex, answerIndex) => {
-    return getAnswersForQuestion(data, level, topic, questionIndex) === getOptionsForQuestion(data, level, topic, questionIndex)[answerIndex];
+    let answersForQuestion = getAnswersForQuestion(data, level, topic, questionIndex);
+    let optionsForQuestion = getOptionsForQuestion(data, level, topic, questionIndex);
+    return answersForQuestion === optionsForQuestion[answerIndex];
 }
 
 let getAllQuestions = (data) => {

@@ -5,6 +5,7 @@ const rl = require("readline-sync");
 // Module imports
 const quiz = require("./quiz/quiz");
 const delay = require("./quiz/utils/delay");
+const playerScreen = require("./players/playerScreen/playerScreen");
 
 
 async function main() {
@@ -17,7 +18,7 @@ async function main() {
         await delay(1000);
         console.log("2. Show Highscores");
         await delay(1000);
-        console.log("3. Manage players");
+        console.log("3. Manage Players");
         await delay(1000);
         console.log("Q. Exit");
 
@@ -33,6 +34,7 @@ async function main() {
                 break;
             case "3":
                 console.log("You chose option 3!");
+                playerScreen();
                 break;
             default:
                 if (answer === "q" || answer === "Q") {

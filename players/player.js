@@ -11,7 +11,7 @@ let addPlayer = (name, avatar, score, buzzerKey) => {
         name: name,
         avatar: avatar,
         score: score, // In case of a
-        buzzerKey: buzzerKey,
+        buzzerKey: buzzerKey.toUpperCase().trim()[0],
         questionsAnswered: 0,
         correctAnswers: 0,
         incorrectAnswers: 0,
@@ -73,7 +73,7 @@ let getPlayerByName = (name) => {
 }
 
 let getPlayerByBuzzerKey = (buzzerKey) => {
-    return players.find(player => player.buzzerKey === buzzerKey);
+    return players.find(player => player.buzzerKey === buzzerKey.toUpperCase().trim()[0]);
 }
 
 let getPlayers = () => {
@@ -227,32 +227,39 @@ let resetPlayers = () => {
     nextPlayerId = 0;
 }
 
-let updatePlayerIfCorrect = (playerName, selectedLevel, selectedTopic, randomQuestion, answer) => {
-    let player = getPlayerByName(playerName);
-    let levels = getAllLevels(data);
-    let points = [];
-    for (let i = 0; i < levels.length; i++) {
-        points.push(i * 100);
+let playerBuzzer = () => {
+    let currentPlayer = '';
+    let buzzer = rl.question("Press your buzzer key to answer: ");
+    let player = getPlayerByBuzzerKey(buzzer);
+    if (player) {
+        currentPlayer = player.name;
     }
-    let metadata = {previousScore: player.score, level: selectedLevel, question: randomQuestion, answer: answer, time: new Date().getTime()}
-    player.answeredCorrectly.push(metadata);
-    addPlayerScore(player.id, points[selectedLevel]);
-    addPlayerCorrectAnswer(player.id);
-    addPlayerQuestionsAnswered(player.id);
+    return currentPlayer;
 }
 
-let updatePlayerIfIncorrect = (playerName, selectedLevel, selectedTopic, randomQuestion, answer) => {
+
+
+let updatePlayerOnAnswer = (playerName, selectedLevel, selectedTopic, randomQuestion, answerText, validated) => {
     let player = getPlayerByName(playerName);
     let levels = getAllLevels(data);
+    let levelIndex = levels.indexOf(selectedLevel);
     let points = [];
     for (let i = 0; i < levels.length; i++) {
-        points.push(i * 100);
+        points.push((i+1) * 100);
     }
-    let metadata = {previousScore: player.score, level: selectedLevel, question: randomQuestion, answer: answer, time: new Date().getTime()}
-    player.answeredIncorrectly.push(metadata);
-    deductPlayerScore(player.id, points[selectedLevel]);
-    deductPlayerIncorrectAnswer(player.id);
+    let metadata = {isCorrect: validated, previousScore: player.score, level: selectedLevel, question: randomQuestion, answer: answerText, time: new Date().getTime()}
+    if (validated) {
+        player.answeredCorrectly.push(metadata);
+        addPlayerCorrectAnswer(player.id);
+        addPlayerScore(player.id, points[levelIndex]);
+    }  else {
+        player.answeredIncorrectly.push(metadata);
+        addPlayerIncorrectAnswer(player.id);
+        deductPlayerScore(player.id, points[levelIndex]);
+    }
     addPlayerQuestionsAnswered(player.id);
+    // Score debugging
+    console.log("Player: " + player.name + " - Score: " + player.score);
 }
 
 module.exports = {
@@ -283,5 +290,6 @@ module.exports = {
     deductPlayerQuestionsAnswered,
     addPlayerIncorrectAnswer,
     deductPlayerIncorrectAnswer,
+    updatePlayerOnAnswer,
 };
 

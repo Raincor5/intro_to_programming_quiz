@@ -8,7 +8,8 @@ let optionsSelector = (selectedLevel, originalTopicIndex, originalQuestionIndex)
     options.forEach((option, index) => console.log(`${index+1}. ` + option));
     let answer = rl.question("Choose an answer: ");
     answer = parseInt(answer);
-    return answer;
+    let answerText = options[answer-1];
+    return [answer, answerText];
 }
 
 module.exports = optionsSelector;
