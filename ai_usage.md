@@ -11,14 +11,17 @@ This document tracks prompts given to an AI assistant and the corresponding resp
 
 ## Entries
 
-| Prompt                                                                                                                                                                                                                  | AI Response     | AI Model                          | Type | Date |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|-----------------------------------|------|---|
-| "Style this ai_usage.md file in markdown format"                                                                                                                                                                        | Styled this file into a clean Markdown layout with sections and a tabular log. | GitHub Copilot - GPT-5            | Agent | 2025-10-18 |
-| "Format the links in the external_sources.md to match the harvard referencing style"                                                                                                                                    | Formatted the link to match the Harvard referencing style. | GitHub Copilot - GPT-5            | Agent | 2025-10-18 |
+| Prompt                                                                                                                                                                                                                  | AI Response     | AI Model                           | Type       | Date |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|------------------------------------|------------|---|
+| "Style this ai_usage.md file in markdown format"                                                                                                                                                                        | Styled this file into a clean Markdown layout with sections and a tabular log. | GitHub Copilot - GPT-5             | Agent      | 2025-10-18 |
+| "Format the links in the external_sources.md to match the harvard referencing style"                                                                                                                                    | Formatted the link to match the Harvard referencing style. | GitHub Copilot - GPT-5             | Agent      | 2025-10-18 |
 | "Assess the current implementation logic; without providing the code, suggest ideas for implementation for sorting out used questions, topics, levels. Can the existing logic work if finished" Context: See Appendix B | See Appendix A. | GitHub Copilot - Claude Sonnet 4.5 | Ask (chat) | 2025-10-18 |
-| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D.                                                                                                                           | See Appendix C. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
-| "What's the javascript's euqivalent of python's sleep()?"                                                                                                                                                               | See Appendix E. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
-| "Help me debug the code. I assume there is a logical error with preserving indices." Context: See Appendix F. | See Appendix G. | Claude Sonnet 4.5 | Chat | 2025-10-18 |
+| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D.                                                                                                                           | See Appendix C. | Claude Sonnet 4.5                  | Chat       | 2025-10-18 |
+| "What's the javascript's euqivalent of python's sleep()?"                                                                                                                                                               | See Appendix E. | Claude Sonnet 4.5                  | Chat       | 2025-10-18 |
+| "Help me debug the code. I assume there is a logical error with preserving indices." Context: See Appendix F. | See Appendix G. | Claude Sonnet 4.5                  | Chat       | 2025-10-18 |
+| "Where is the logical error? Why am I failing to modularize the loop functions?" Context: See Appendx H.| See Appendix I. | GitHub Copilot (GPT-5 mini)        | Ask (Chat) | 2025-10-18 |
+
+
 
 ## Appendices
 
@@ -439,3 +442,114 @@ let availableQuestions = getAvailableQuestions(data, originalLevelIndex, origina
 ```
 
 This ensures you're passing the correct index that corresponds to the actual position in the original data structure.
+
+### Appendix H
+
+#### Console Output
+
+```terminaloutput
+[ 'easy', 'medium', 'hard' ]
+easy
+medium
+hard Choose a level: 1 [ 'easy', 'medium', 'hard' ]
+easy
+medium
+hard Choose a level: 1 /Users/raincor/PythonProject/data/dataManager.js:41 data[level].forEach(topicObj => { ^
+TypeError: Cannot read properties of undefined (reading 'forEach') at Object.getTopicByLevel (/Users/raincor/PythonProject/data/dataManager.js:41:17) at getAvailableQuestions (/Users/raincor/PythonProject/quiz/utils/checkUsed.js:40:30) at quiz (/Users/raincor/PythonProject/quiz/quiz.js:29:34) at async main (/Users/raincor/PythonProject/main.js:28:17)
+Node.js v24.2.0
+Process finished with exit code 1
+```
+
+
+#### quiz.js
+```js
+const data = require('../data/data.js');
+const rl = require('readline-sync');
+
+// Notes
+// data structure: questions[level][topic].questions[index] OR questions.levelName[topic].questions[index]
+
+// Module imports
+const getRandomNumber = require('./utils/getRNG.js');
+const {getAllTopics, getAllLevels, getTopicByLevel, getOptionsForQuestion, validateAnswer, getQuestionsByTopic} = require("../data/dataManager");
+const delay = require('./utils/delay.js');
+const { markAsUsedQuestion, markAsUsedLevel,
+    markAsUsedTopic, validateUsedQuestion, validateUsedLevel,
+    validateUsedTopic, checkAllQuestionsUsedForTopic, checkAllQuestionsUsedForLevel, checkAllLevelsUsed,
+    usedQuestions, usedLevels, usedTopics} = require('./utils/checkUsed.js');
+const {getAvailableQuestions, getAvailableTopics, getAvailableLevels} = require("./utils/checkUsed");
+const welcomeMessage = require("./functions/welcome");
+const levelSelector = require("./functions/levelSelector");
+const topicSelector = require("./functions/topicSelector");
+
+async function quiz() {
+    let isRunning = false;
+    await welcomeMessage();
+    isRunning = true;
+    while (isRunning) {
+        let currentPlayer = "Player 1"; // placeholder
+        // show scores - todo: implement
+        let [originalLevelIndex, selectedLevel, level] = levelSelector();
+        let [originalTopicIndex, selectedTopic, topic] = topicSelector(originalLevelIndex, selectedLevel);
+
+        let availableQuestions = getAvailableQuestions(data, originalLevelIndex, originalTopicIndex);
+        let randomQuestionIndex = getRandomNumber(0, availableQuestions.length - 1);
+        let randomQuestion = availableQuestions[randomQuestionIndex];
+        console.log(randomQuestion);
+
+        // Find the original index in the full questions array
+        let allQuestionsForTopic = getQuestionsByTopic(data, selectedTopic);
+        let originalQuestionIndex = -1;
+        for (let i = 0; i < allQuestionsForTopic.length; i++) {
+            if (allQuestionsForTopic[i] === randomQuestion) {
+                originalQuestionIndex = i;
+                break;
+            }
+        }
+
+        let options = getOptionsForQuestion(data, selectedLevel, originalTopicIndex, originalQuestionIndex);
+        console.log(options);
+        options.forEach((option, index) => console.log(`${index+1}. ` + option));
+        let answer = rl.question("Choose an answer: ");
+        answer = parseInt(answer);
+        let validate = validateAnswer(data, selectedLevel, originalTopicIndex, originalQuestionIndex, answer-1);
+
+        if (validate) {
+            console.log("Correct!");
+            // Here goes the point addition
+        } else {
+            console.log("Wrong!");
+            // Here goes the point subtraction
+        }
+        markAsUsedQuestion(randomQuestion);
+        console.log("Next question!");
+        await delay(1000);
+        console.clear();
+    }
+};
+
+module.exports = quiz;
+```
+
+### Appendix I
+
+The error is caused by incorrect variable assignment when calling levelSelector. This line:
+let originalLevelIndex, selectedLevel, level = levelSelector();
+only assigns the return value to level — originalLevelIndex and selectedLevel remain undefined. You then pass undefined into getTopicByLevel (via getAvailableQuestions), causing the data[level] lookup to fail.
+Fix: use array (or object) destructuring to receive all returned values, and call the correct selector for topic selection (if you intended a separate topic selector).
+Brief fix examples for quiz/quiz.js:
+
+```js
+// javascript
+// If levelSelector returns an array [originalLevelIndex, selectedLevel, level]
+const [originalLevelIndex, selectedLevel, level] = levelSelector();
+
+// Then, for topic selection: either a topicSelector or levelSelector used with args
+// If you have a separate topicSelector(levelIndex, levelName):
+const [originalTopicIndex, selectedTopic, topic] = topicSelector(originalLevelIndex, selectedLevel);
+
+// OR if levelSelector is reused and returns topic info when given level args:
+const [originalTopicIndex, selectedTopic, topic] = levelSelector(originalLevelIndex, selectedLevel);
+```
+
+Summary: use proper destructuring when a function returns multiple values, and ensure you're calling the intended selector function for topics instead of reusing the level selector with wrong/undefined arguments.
