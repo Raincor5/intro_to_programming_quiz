@@ -5,6 +5,41 @@ let players = [];
 let nextPlayerId = 0;
 let currentPlayerName = '';
 
+let validator = (player) => {
+    // Type validation
+    if (typeof player.name !== 'string' || player.name.length < 2 || player.name.length > 20) {
+        console.log("Name must be a string!");
+        return false;
+    }
+
+    if (typeof player.avatar !== 'string' || player.avatar.length < 2 || player.avatar.length > 2) {
+        console.log("Avatar must be a single unicode emoji character! \nFor windows: 'WIN + <'. \nFor mac: 'CMD + OPT + SPACE'");
+        return false;
+    }
+
+    if (typeof player.score !== 'number') {
+        console.log("Score must be a number!");
+        return false;
+    }
+
+    if (player.score < 0) {
+        console.log("Score must be a positive number!");
+        return false;
+    }
+
+    if (typeof player.buzzerKey !== 'string') {
+        console.log("Buzzer key must be a string!");
+        return false;
+    }
+
+    // Duplicate validation
+    if (players.some(p => p.name === player.name) || players.some(p => p.buzzerKey === player.buzzerKey)) {
+        console.log("Player already exists!");
+        return false;
+    }
+    return true;
+}
+
 let addPlayer = (name, avatar, score, buzzerKey) => {
     let playerConstructor = {
         id: nextPlayerId++,
@@ -19,41 +54,6 @@ let addPlayer = (name, avatar, score, buzzerKey) => {
         answeredIncorrectly: [],
     }
 
-    let validator = (player) => {
-        // Type validation
-        if (typeof player.name !== 'string' || player.name.length < 2 || player.name.length > 20) {
-            console.log("Name must be a string!");
-            return false;
-        }
-
-        if (typeof player.avatar !== 'string' || player.avatar.length < 2 || player.avatar.length > 2) {
-            console.log("Avatar must be a single unicode emoji character! \nFor windows: 'WIN + <'. \nFor mac: 'CMD + OPT + SPACE'");
-            return false;
-        }
-
-        if (typeof player.score !== 'number') {
-            console.log("Score must be a number!");
-            return false;
-        }
-
-        if (player.score < 0) {
-            console.log("Score must be a positive number!");
-            return false;
-        }
-
-        if (typeof player.buzzerKey !== 'string') {
-            console.log("Buzzer key must be a string!");
-            return false;
-        }
-
-        // Duplicate validation
-        if (players.some(p => p.name === player.name) || players.some(p => p.buzzerKey === player.buzzerKey)) {
-            console.log("Player already exists!");
-            return false;
-        }
-        return true;
-    }
-
     if (!validator(playerConstructor)) {
         console.log("Invalid player data!");
         return false;
@@ -65,7 +65,10 @@ let addPlayer = (name, avatar, score, buzzerKey) => {
 }
 
 let getPlayerById = (id) => {
-    return players.find(player => player.id === id);
+    let player = players.find(player => player.id === id);
+    console.log(player);
+    console.log(typeof player);
+    return player;
 }
 
 let getPlayerByName = (name) => {
@@ -108,6 +111,30 @@ let getPlayersIncorrectAnswers = () => {
     let playerIncorrectAnswers = [];
     players.forEach(player => playerIncorrectAnswers.push(player.incorrectAnswers));
     return playerIncorrectAnswers;
+}
+
+let updatePlayerBasicInfo = (playerId, name, avatar, score, buzzerKey) => {
+    console.log(playerId, name, avatar, score, buzzerKey)
+    let player = getPlayerById(playerId);
+    console.log(player.name);
+    let tempPlayer = {...player}; // Shallow copy
+    if (validator(player) && player.id === playerId) {
+        player.name = name;
+        player.avatar = avatar;
+        player.score = score;
+        player.buzzerKey = buzzerKey;
+    } else {
+        console.log("Invalid player data!");
+    }
+    if(!validator(player) && player.id === playerId) {
+        player.name = tempPlayer.name;
+        player.avatar = tempPlayer.avatar;
+        player.score = tempPlayer.score;
+        player.buzzerKey = tempPlayer.buzzerKey;
+        console.log("Invalid player data!");
+        return false;
+    }
+    return true;
 }
 
 let updatePlayerScore = (playerId, score) => {
@@ -291,5 +318,6 @@ module.exports = {
     addPlayerIncorrectAnswer,
     deductPlayerIncorrectAnswer,
     updatePlayerOnAnswer,
+    updatePlayerBasicInfo,
 };
 

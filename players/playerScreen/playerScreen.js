@@ -1,6 +1,7 @@
 const rl = require("readline-sync");
 const {addPlayerOption} = require("./options/addPlayer");
 const showPlayersOption = require("./options/showPlayersOption");
+const editPlayerOption = require("./options/editPlayerScreen");
 
 async function playerScreen() {
     let isRunning = true;
@@ -19,6 +20,7 @@ async function playerScreen() {
                 showPlayersOption();
                 break;
             case 3:
+                editPlayerOption();
                 break;
             case 4:
                 isRunning = false;

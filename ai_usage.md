@@ -11,15 +11,16 @@ This document tracks prompts given to an AI assistant and the corresponding resp
 
 ## Entries
 
-| Prompt                                                                                                                                                                                                                  | AI Response     | AI Model                           | Type       | Date |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|------------------------------------|------------|---|
-| "Style this ai_usage.md file in markdown format"                                                                                                                                                                        | Styled this file into a clean Markdown layout with sections and a tabular log. | GitHub Copilot - GPT-5             | Agent      | 2025-10-18 |
-| "Format the links in the external_sources.md to match the harvard referencing style"                                                                                                                                    | Formatted the link to match the Harvard referencing style. | GitHub Copilot - GPT-5             | Agent      | 2025-10-18 |
+| Prompt                                                                                                                                                                                                                  | AI Response     | AI Model                          | Type       | Date |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|-----------------------------------|------------|---|
+| "Style this ai_usage.md file in markdown format"                                                                                                                                                                        | Styled this file into a clean Markdown layout with sections and a tabular log. | GitHub Copilot - GPT-5            | Agent      | 2025-10-18 |
+| "Format the links in the external_sources.md to match the harvard referencing style"                                                                                                                                    | Formatted the link to match the Harvard referencing style. | GitHub Copilot - GPT-5            | Agent      | 2025-10-18 |
 | "Assess the current implementation logic; without providing the code, suggest ideas for implementation for sorting out used questions, topics, levels. Can the existing logic work if finished" Context: See Appendix B | See Appendix A. | GitHub Copilot - Claude Sonnet 4.5 | Ask (chat) | 2025-10-18 |
-| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D.                                                                                                                           | See Appendix C. | Claude Sonnet 4.5                  | Chat       | 2025-10-18 |
-| "What's the javascript's euqivalent of python's sleep()?"                                                                                                                                                               | See Appendix E. | Claude Sonnet 4.5                  | Chat       | 2025-10-18 |
-| "Help me debug the code. I assume there is a logical error with preserving indices." Context: See Appendix F. | See Appendix G. | Claude Sonnet 4.5                  | Chat       | 2025-10-18 |
-| "Where is the logical error? Why am I failing to modularize the loop functions?" Context: See Appendx H.| See Appendix I. | GitHub Copilot (GPT-5 mini)        | Ask (Chat) | 2025-10-18 |
+| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D.                                                                                                                           | See Appendix C. | Claude Sonnet 4.5                 | Chat       | 2025-10-18 |
+| "What's the javascript's euqivalent of python's sleep()?"                                                                                                                                                               | See Appendix E. | Claude Sonnet 4.5                 | Chat       | 2025-10-18 |
+| "Help me debug the code. I assume there is a logical error with preserving indices." Context: See Appendix F. | See Appendix G. | Claude Sonnet 4.5                 | Chat       | 2025-10-18 |
+| "Where is the logical error? Why am I failing to modularize the loop functions?" Context: See Appendx H.| See Appendix I. | GitHub Copilot (GPT-5 mini)       | Ask (Chat) | 2025-10-18 |
+| [Some previous messages regarding validator are exluded due to redundancy] "By reference? I hate javascript... How to copy the player data to tempPlayer?" | See Appendix J. | GitHub Copilot (GPT-5)        | Ask (Chat) | 2025-10-18 |
 
 
 
@@ -553,3 +554,42 @@ const [originalTopicIndex, selectedTopic, topic] = levelSelector(originalLevelIn
 ```
 
 Summary: use proper destructuring when a function returns multiple values, and ensure you're calling the intended selector function for topics instead of reusing the level selector with wrong/undefined arguments.
+
+### Appendix J
+
+Objects are assigned by reference in JS. To take a snapshot, clone the object.
+- Shallow copy (copies top-level fields only): const temp = { ...player };
+- Deep copy (Node 17+/modern runtimes): const temp = structuredClone(player);
+- Deep copy (portable fallback, JSON-safe data only): const temp = JSON.parse(JSON.stringify(player));
+Example showing each option and a simple revert:
+
+```js
+// javascript
+// Shallow copy (OK if you only change primitives like name/avatar/score/buzzerKey)
+const tempShallow = { ...player };
+
+// Deep copy with structuredClone (Node 17+ / modern browsers)
+const tempDeep = typeof structuredClone === 'function'
+  ? structuredClone(player)
+  : JSON.parse(JSON.stringify(player)); // Fallback for JSON-safe data
+
+// Minimal snapshot if you only need to revert these fields
+const prev = {
+  name: player.name,
+  avatar: player.avatar,
+  score: player.score,
+  buzzerKey: player.buzzerKey,
+};
+
+// Apply tentative changes
+player.name = name;
+player.avatar = avatar;
+player.score = score;
+player.buzzerKey = buzzerKey?.toUpperCase().trim()[0];
+
+// If invalid, revert
+if (!validator(player)) {
+  Object.assign(player, prev);
+  console.log('Invalid player data!');
+}
+```
