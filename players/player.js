@@ -1,6 +1,8 @@
 const {getAllLevels} = require("../data/dataManager");
 const data = require("../data/data");
+const rl = require("readline-sync");
 let players = [];
+
 
 let nextPlayerId = 0;
 
@@ -304,6 +306,12 @@ let resetPlayers = () => {
 
 let playerBuzzer = () => {
     let currentPlayer = '';
+    let players = getPlayers();
+    console.log("Available buzzers: ")
+    players.forEach(player => console.log(
+        player.buzzerKey + " - " + player.name
+        )
+    )
     let buzzer = rl.question("Press your buzzer key to answer: ");
     let player = getPlayerByBuzzerKey(buzzer);
     if (player) {
@@ -367,5 +375,6 @@ module.exports = {
     deductPlayerIncorrectAnswer,
     updatePlayerOnAnswer,
     updatePlayerBasicInfo,
+    playerBuzzer,
 };
 

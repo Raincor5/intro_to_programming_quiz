@@ -4,17 +4,22 @@ const rl = require("readline-sync");
 const {getAllLevels} = require("../../data/dataManager");
 
 let levelSelector =  () => {
+    console.clear();
+    let quitCheck = false;
     while (true) {
         let availableLevels = getAvailableLevels(data);
-        console.log(availableLevels);
-        availableLevels.forEach(((level, index) => console.log(`${ index+1 }. ` + level)));
-        let level = rl.question("Choose a level: ");
+        availableLevels.forEach(((level, index) => console.log(`${index + 1}. ` + level)));
+        let level = rl.question("Choose a level (q to quit): ");
+        if (level === "q" || level === "Q") {
+            console.log("Goodbye!");
+            return [null, null, quitCheck = true];
+        }
         level = parseInt(level);
         if (level < 1 || level > availableLevels.length || isNaN(level)) {
             console.log("Invalid level selected. Please try again.");
             continue;
         }
-        let selectedLevel = availableLevels[level-1];
+        let selectedLevel = availableLevels[level - 1];
         let allLevels = getAllLevels(data);
         let originalLevelIndex = -1;
         for (let i = 0; i < allLevels.length; i++) {
@@ -23,7 +28,7 @@ let levelSelector =  () => {
                 break;
             }
         }
-        return [originalLevelIndex, selectedLevel, level];
+        return [originalLevelIndex, selectedLevel, quitCheck = false];
     }
 }
 

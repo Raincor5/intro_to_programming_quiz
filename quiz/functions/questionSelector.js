@@ -6,6 +6,7 @@ const getRandomNumber = require("../utils/getRNG");
 const {getQuestionsByTopic} = require("../../data/dataManager");
 
 let questionSelector = (originalLevelIndex, originalTopicIndex, selectedTopic) => {
+    console.clear();
     let availableQuestions = getAvailableQuestions(data, originalLevelIndex, originalTopicIndex);
     let randomQuestionIndex = getRandomNumber(0, availableQuestions.length - 1);
     let randomQuestion = availableQuestions[randomQuestionIndex];

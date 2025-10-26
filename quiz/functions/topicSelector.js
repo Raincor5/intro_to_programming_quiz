@@ -4,6 +4,7 @@ const data = require("../../data/data");
 const {question} = require("readline-sync");
 
 let topicSelector =  (originalLevelIndex) => {
+    console.clear();
     while (true) {
         let availableTopics = getAvailableTopics(data, originalLevelIndex);
         availableTopics.forEach((topic, index) => console.log(`${index+1}. ` + topic));

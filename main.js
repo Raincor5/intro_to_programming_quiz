@@ -12,6 +12,7 @@ const highscoresScreen = require("./highscores/highscoresScreen/highscoresScreen
 async function main() {
     let isRunning = true;
     while (isRunning) {
+        console.clear();
         console.log("Welcome to the Quiz Game!");
         // MENU
         await delay(1000);

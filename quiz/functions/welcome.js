@@ -4,6 +4,7 @@ const getRandomNumber = require("../utils/getRNG");
 const data = require('../../data/data.js');
 
 let welcomeMessage = async () => {
+    console.clear();
     console.log("Welcome to the quiz!");
     await delay(1000);
     console.clear();
