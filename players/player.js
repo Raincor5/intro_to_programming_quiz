@@ -3,7 +3,32 @@ const data = require("../data/data");
 let players = [];
 
 let nextPlayerId = 0;
-let currentPlayerName = '';
+
+// THIS CHUNK WAS AI-GENERATED TO PROVIDE EMOJI OPTIONS FOR AVATARS
+const EMOJI_POOL = [
+    '😀','😁','😂','🤣','😎','🧐','🤓','🥳','🤖','👾',
+    '🐶','🐱','🦊','🐼','🐨','🐯','🦁','🐸','🐵','🦄',
+    '⚽','🏀','🏈','⚾','🎾','🏐','🎲','🧩','🚀','⭐'
+];
+
+function pickRandomEmoji() {
+    return EMOJI_POOL[Math.floor(Math.random() * EMOJI_POOL.length)]; // Could use the getRandomNUmber function from utils
+}
+
+function ensureAvatar(input) {
+    const s = typeof input === 'string' ? input.trim() : '';
+    if (!s) return pickRandomEmoji();
+
+    // Prefer a single grapheme; fall back to any non-empty string
+    try {
+        const seg = new Intl.Segmenter('en', { granularity: 'grapheme' });
+        const clusters = [...seg.segment(s)];
+        return clusters.length === 1 ? s : pickRandomEmoji();
+    } catch {
+        return s; // Simple fallback without Segmenter
+    }
+}
+// END OF THE AI-GENERATED CODE
 
 let validator = (player) => {
     // Type validation
@@ -12,18 +37,10 @@ let validator = (player) => {
         return false;
     }
 
-    if (typeof player.avatar !== 'string' || player.avatar.length < 2 || player.avatar.length > 2) {
-        console.log("Avatar must be a single unicode emoji character! \nFor windows: 'WIN + <'. \nFor mac: 'CMD + OPT + SPACE'");
-        return false;
-    }
+    player.avatar = ensureAvatar(player.avatar);
 
     if (typeof player.score !== 'number' || isNaN(player.score)) {
         console.log("Score must be a number!");
-        return false;
-    }
-
-    if (player.score < 0) {
-        console.log("Score must be a positive number!");
         return false;
     }
 
@@ -127,10 +144,6 @@ let updatePlayerBasicInfo = (playerId, name, avatar, score, buzzerKey) => {
         nextScore = player.score;
     } else {
         const n = Number(score);
-        if (Number.isNaN(n) || n < 0) {
-            console.log("Score must be a positive number!");
-            return false;
-        }
         nextScore = n;
     }
 
@@ -150,7 +163,12 @@ let updatePlayerBasicInfo = (playerId, name, avatar, score, buzzerKey) => {
         return false;
     }
 
-    const duplicate = players.some(p => p.id !== id && (p.name === nextName || p.buzzerKey === nextBuzzer));
+    const nameChanged = nextName !== player.name;
+    const buzzerChanged = nextBuzzer !== player.buzzerKey;
+    const duplicate = players.some(p => p.id !== id && (
+        (nameChanged && p.name === nextName) ||
+        (buzzerChanged && p.buzzerKey === nextBuzzer)
+    ));
     if (duplicate) {
         console.log("Player already exists!");
         return false;
@@ -196,7 +214,9 @@ let updatePlayerQuestionsAnswered = (playerId, questionsAnswered) => {
 let updatePlayerBuzzerKey = (playerId, buzzerKey) => {
     let player = getPlayerById(playerId);
     if (player) {
-        player.buzzerKey = String(buzzerKey).toUpperCase().trim()[0];
+        const s = typeof buzzerKey === 'string' ? buzzerKey.trim() : '';
+        if (!s) return; // ignore empty input
+        player.buzzerKey = s.toUpperCase()[0];
     }
 }
 
