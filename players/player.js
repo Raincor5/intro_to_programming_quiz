@@ -7,7 +7,7 @@ let currentPlayerName = '';
 
 let validator = (player) => {
     // Type validation
-    if (typeof player.name !== 'string' || player.name.length < 2 || player.name.length > 20) {
+    if (typeof player.name !== 'string' || player.name.trim().length < 2 || player.name.trim().length > 20) {
         console.log("Name must be a string!");
         return false;
     }
@@ -17,7 +17,7 @@ let validator = (player) => {
         return false;
     }
 
-    if (typeof player.score !== 'number') {
+    if (typeof player.score !== 'number' || isNaN(player.score)) {
         console.log("Score must be a number!");
         return false;
     }
@@ -27,48 +27,46 @@ let validator = (player) => {
         return false;
     }
 
-    if (typeof player.buzzerKey !== 'string') {
+    if (typeof player.buzzerKey !== 'string' || player.buzzerKey.trim().length === 0) {
         console.log("Buzzer key must be a string!");
         return false;
     }
 
-    // Duplicate validation
-    if (players.some(p => p.name === player.name) || players.some(p => p.buzzerKey === player.buzzerKey)) {
-        console.log("Player already exists!");
-        return false;
-    }
     return true;
 }
 
 let addPlayer = (name, avatar, score, buzzerKey) => {
+    const normalizerBuzzer = String(buzzerKey || '').toUpperCase().trim()[0];
     let playerConstructor = {
         id: nextPlayerId++,
         name: name,
         avatar: avatar,
-        score: score, // In case of a
-        buzzerKey: buzzerKey.toUpperCase().trim()[0],
+        score: score, // In case of a handicap, this will be the initial score
+        buzzerKey: normalizerBuzzer,
         questionsAnswered: 0,
         correctAnswers: 0,
         incorrectAnswers: 0,
         answeredCorrectly:[],
         answeredIncorrectly: [],
     }
-
-    if (!validator(playerConstructor)) {
+    let validate = validator(playerConstructor);
+    if (!validate) {
         console.log("Invalid player data!");
         return false;
-    } else {
-        console.log("Player added successfully!");
-        players.push(playerConstructor);
-        return true;
     }
+    const duplicate = players.find(player => player.name === name || player.buzzerKey === normalizerBuzzer);
+    if (duplicate) {
+        console.log("Player with the same name or buzzer key already exists!");
+        return false;
+    }
+    players.push(playerConstructor);
+    console.log("Player added successfully!");
+    return true;
 }
 
 let getPlayerById = (id) => {
-    let player = players.find(player => player.id === id);
-    console.log(player);
-    console.log(typeof player);
-    return player;
+    const numId = Number(id);
+    return players.find(player => player.id === numId) || null;
 }
 
 let getPlayerByName = (name) => {
@@ -114,28 +112,58 @@ let getPlayersIncorrectAnswers = () => {
 }
 
 let updatePlayerBasicInfo = (playerId, name, avatar, score, buzzerKey) => {
-    console.log(playerId, name, avatar, score, buzzerKey)
-    let player = getPlayerById(playerId);
-    console.log(player.name);
-    let tempPlayer = {...player}; // Shallow copy
-    if (validator(player) && player.id === playerId) {
-        player.name = name;
-        player.avatar = avatar;
-        player.score = score;
-        player.buzzerKey = buzzerKey;
-    } else {
-        console.log("Invalid player data!");
+    const id = Number(playerId);
+    const player = getPlayerById(id);
+    if (!player) {
+        console.log("Player not found!");
+        return false;
     }
-    if(!validator(player) && player.id === playerId) {
-        player.name = tempPlayer.name;
-        player.avatar = tempPlayer.avatar;
-        player.score = tempPlayer.score;
-        player.buzzerKey = tempPlayer.buzzerKey;
+
+    const nextName = (typeof name === 'string' && name.trim() !== '') ? name : player.name;
+    const nextAvatar = (typeof avatar === 'string' && avatar.trim() !== '') ? avatar : player.avatar;
+
+    let nextScore;
+    if (score === '' || score === undefined || score === null) {
+        nextScore = player.score;
+    } else {
+        const n = Number(score);
+        if (Number.isNaN(n) || n < 0) {
+            console.log("Score must be a positive number!");
+            return false;
+        }
+        nextScore = n;
+    }
+
+    const nextBuzzer = (typeof buzzerKey === 'string' && buzzerKey.trim() !== '')
+        ? String(buzzerKey).toUpperCase().trim()[0]
+        : player.buzzerKey;
+
+    const candidate = {
+        name: nextName,
+        avatar: nextAvatar,
+        score: nextScore,
+        buzzerKey: nextBuzzer,
+    };
+    let validate = validator(candidate);
+    if (!validate) {
         console.log("Invalid player data!");
         return false;
     }
+
+    const duplicate = players.some(p => p.id !== id && (p.name === nextName || p.buzzerKey === nextBuzzer));
+    if (duplicate) {
+        console.log("Player already exists!");
+        return false;
+    }
+
+    player.name = nextName;
+    player.avatar = nextAvatar;
+    player.score = nextScore;
+    player.buzzerKey = nextBuzzer;
+
+    console.log("Player updated successfully!");
     return true;
-}
+};
 
 let updatePlayerScore = (playerId, score) => {
     let player = getPlayerById(playerId);
@@ -168,7 +196,7 @@ let updatePlayerQuestionsAnswered = (playerId, questionsAnswered) => {
 let updatePlayerBuzzerKey = (playerId, buzzerKey) => {
     let player = getPlayerById(playerId);
     if (player) {
-        player.buzzerKey = buzzerKey;
+        player.buzzerKey = String(buzzerKey).toUpperCase().trim()[0];
     }
 }
 
