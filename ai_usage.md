@@ -11,16 +11,17 @@ This document tracks prompts given to an AI assistant and the corresponding resp
 
 ## Entries
 
-| Prompt                                                                                                                                                                                                                  | AI Response     | AI Model                          | Type       | Date |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|-----------------------------------|------------|---|
-| "Style this ai_usage.md file in markdown format"                                                                                                                                                                        | Styled this file into a clean Markdown layout with sections and a tabular log. | GitHub Copilot - GPT-5            | Agent      | 2025-10-18 |
-| "Format the links in the external_sources.md to match the harvard referencing style"                                                                                                                                    | Formatted the link to match the Harvard referencing style. | GitHub Copilot - GPT-5            | Agent      | 2025-10-18 |
-| "Assess the current implementation logic; without providing the code, suggest ideas for implementation for sorting out used questions, topics, levels. Can the existing logic work if finished" Context: See Appendix B | See Appendix A. | GitHub Copilot - Claude Sonnet 4.5 | Ask (chat) | 2025-10-18 |
-| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D.                                                                                                                           | See Appendix C. | Claude Sonnet 4.5                 | Chat       | 2025-10-18 |
-| "What's the javascript's euqivalent of python's sleep()?"                                                                                                                                                               | See Appendix E. | Claude Sonnet 4.5                 | Chat       | 2025-10-18 |
-| "Help me debug the code. I assume there is a logical error with preserving indices." Context: See Appendix F. | See Appendix G. | Claude Sonnet 4.5                 | Chat       | 2025-10-18 |
-| "Where is the logical error? Why am I failing to modularize the loop functions?" Context: See Appendx H.| See Appendix I. | GitHub Copilot (GPT-5 mini)       | Ask (Chat) | 2025-10-18 |
-| [Some previous messages regarding validator are exluded due to redundancy] "By reference? I hate javascript... How to copy the player data to tempPlayer?" | See Appendix J. | GitHub Copilot (GPT-5)        | Ask (Chat) | 2025-10-18 |
+| Prompt                                                                                                                                                                                                                  | AI Response                                                                    | AI Model                         | Type       | Date       |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|----------------------------------|------------|------------|
+| "Style this ai_usage.md file in markdown format"                                                                                                                                                                        | Styled this file into a clean Markdown layout with sections and a tabular log. | GitHub Copilot - GPT-5           | Agent      | 2025-10-18 |
+| "Format the links in the external_sources.md to match the harvard referencing style"                                                                                                                                    | Formatted the link to match the Harvard referencing style.                     | GitHub Copilot - GPT-5           | Agent      | 2025-10-18 |
+| "Help me with the data file structure. But do not porivde any code." Context: See Appendix D.                                                                                                                           | See Appendix C.                                                                | Claude Sonnet 4.5                | Chat       | 2025-10-19 |
+| "What's the javascript's euqivalent of python's sleep()?"                                                                                                                                                               | See Appendix E.                                                                | Claude Sonnet 4.5                | Chat       | 2025-10-23 |
+| "Help me debug the code. I assume there is a logical error with preserving indices." Context: See Appendix F.                                                                                                           | See Appendix G.                                                                | Claude Sonnet 4.5                | Chat       | 2025-10-24 |
+| "Where is the logical error? Why am I failing to modularize the loop functions?" Context: See Appendx H.                                                                                                                | See Appendix I.                                                                | GitHub Copilot (GPT-5 mini)      | Ask (Chat) | 2025-10-24 |
+| [Some previous messages regarding validator are exluded due to redundancy] "By reference? I hate javascript... How to copy the player data to tempPlayer?"                                                              | See Appendix J.                                                                | GitHub Copilot (GPT-5)       | Ask (Chat) | 2025-10-26 |
+| See Appendix K. "Something more simple."  Context: Git hash 502c0c0.                                                                                                                                                    | See Appendix L.                                                                | GitHub Copilot (GPT-5)       | Ask (Chat) | 2025-10-26 |
+| "Update player now in infinite loop, not updating?" Context: Git hash 44c3402. | See Appendix M.                                                                | GitHub Copilot (GPT-5)       | Ask (Chat) | 2025-10-18 |
 
 
 
@@ -592,4 +593,299 @@ if (!validator(player)) {
   Object.assign(player, prev);
   console.log('Invalid player data!');
 }
+```
+
+### Appendix K
+
+```terminaloutput
+Add Player
+============================================================
+ To open emoji picker, press Ctrl + Alt + < on Windows 10+,
+             or Control + Cmd + Space on macOS.
+============================================================
+Add Player
+============================================================
+ To open emoji picker, press Ctrl + Alt + < on Windows 10+,
+             or Control + Cmd + Space on macOS.
+============================================================
+Add Player
+============================================================
+ To open emoji picker, press Ctrl + Alt + < on Windows 10+,
+Edit Player
+2. Jaro 💕 Score: 0 Buzzer key: J
+
+Select a player to edit (ID): 2
+{
+  id: 2,
+  name: 'Jaro',
+  avatar: '💕',
+  score: 0,
+  buzzerKey: 'J',
+  questionsAnswered: 0,
+  correctAnswers: 0,
+  incorrectAnswers: 0,
+  answeredCorrectly: [],
+  answeredIncorrectly: []
+}
+object
+Player selected!
+Enter new player name: JaroNew
+Enter new player avatar: 🇷🇺
+Enter new player score: 0
+Enter new buzzer key: j
+2 JaroNew 🇷🇺 0 j
+undefined
+undefined
+/Users/raincor/PythonProject/players/player.js:119
+    console.log(player[0].name);
+                      ^
+
+TypeError: Cannot read properties of undefined (reading '0')
+    at updatePlayerBasicInfo (/Users/raincor/PythonProject/players/player.js:119:23)
+    at editPlayerScreen (/Users/raincor/PythonProject/players/playerScreen/options/editPlayerScreen.js:24:12)
+    at playerScreen (/Users/raincor/PythonProject/players/playerScreen/playerScreen.js:23:17)
+
+Node.js v24.2.0
+
+Process finished with exit code 1
+```
+
+### Appendix L
+
+Here’s a simpler fix that addresses the crash and keeps validation straightforward:
+Coerce id to a number in getPlayerById to avoid undefined.
+Keep validator for basic checks only; move duplicate checks into add/update.
+Normalize the buzzer key in add/update.
+Guard against missing player in update and avoid logging undefined fields.
+Update these parts in players/player.js:
+
+```js
+// javascript
+// Simple validator: only type/range checks
+let validator = (player) => {
+    if (typeof player.name !== 'string' || player.name.trim().length < 2 || player.name.trim().length > 20) {
+        console.log("Name must be a string!");
+        return false;
+    }
+    if (typeof player.avatar !== 'string' || player.avatar.length < 2 || player.avatar.length > 2) {
+        console.log("Avatar must be a single unicode emoji character! \nFor windows: 'WIN + <'. \nFor mac: 'CMD + OPT + SPACE'");
+        return false;
+    }
+    if (typeof player.score !== 'number' || Number.isNaN(player.score)) {
+        console.log("Score must be a number!");
+        return false;
+    }
+    if (player.score < 0) {
+        console.log("Score must be a positive number!");
+        return false;
+    }
+    if (typeof player.buzzerKey !== 'string' || player.buzzerKey.trim().length === 0) {
+        console.log("Buzzer key must be a string!");
+        return false;
+    }
+    return true;
+};
+
+let getPlayerById = (id) => {
+    const numId = Number(id);
+    return players.find(player => player.id === numId) || null;
+};
+
+let addPlayer = (name, avatar, score, buzzerKey) => {
+    const normalizedBuzzer = String(buzzerKey || '').toUpperCase().trim()[0];
+    const playerConstructor = {
+        id: nextPlayerId++,
+        name: name,
+        avatar: avatar,
+        score: score,
+        buzzerKey: normalizedBuzzer,
+        questionsAnswered: 0,
+        correctAnswers: 0,
+        incorrectAnswers: 0,
+        answeredCorrectly: [],
+        answeredIncorrectly: [],
+    };
+
+    if (!validator(playerConstructor)) {
+        console.log("Invalid player data!");
+        return false;
+    }
+
+    const duplicate = players.some(p => p.name === name || p.buzzerKey === normalizedBuzzer);
+    if (duplicate) {
+        console.log("Player already exists!");
+        return false;
+    }
+
+    players.push(playerConstructor);
+    console.log("Player added successfully!");
+    return true;
+};
+
+let updatePlayerBasicInfo = (playerId, name, avatar, score, buzzerKey) => {
+    const id = Number(playerId);
+    const player = getPlayerById(id);
+    if (!player) {
+        console.log("Player not found!");
+        return false;
+    }
+
+    const normalizedBuzzer = String(buzzerKey || '').toUpperCase().trim()[0];
+    const numericScore = Number(score);
+
+    const candidate = {
+        name: name,
+        avatar: avatar,
+        score: numericScore,
+        buzzerKey: normalizedBuzzer,
+    };
+
+    if (!validator(candidate)) {
+        console.log("Invalid player data!");
+        return false;
+    }
+
+    const duplicate = players.some(p => p.id !== id && (p.name === name || p.buzzerKey === normalizedBuzzer));
+    if (duplicate) {
+        console.log("Player already exists!");
+        return false;
+    }
+
+    player.name = name;
+    player.avatar = avatar;
+    player.score = numericScore;
+    player.buzzerKey = normalizedBuzzer;
+
+    console.log("Player updated successfully!");
+    return true;
+};
+
+let updatePlayerBuzzerKey = (playerId, buzzerKey) => {
+    const player = getPlayerById(playerId);
+    if (player) {
+        player.buzzerKey = String(buzzerKey || '').toUpperCase().trim()[0];
+    }
+};
+```
+
+### Appendix M
+
+Likely cause: the update screen re-prompts because validator rejects composite emojis (e.g., flags like 🇷🇺). Your current check avatar.length === 2 fails for multi-code-unit emojis, so updatePlayerBasicInfo returns false and the UI loops.
+Fix: validate the avatar as a single grapheme cluster instead of code units.
+Patch validator in players/player.js:
+
+```js
+// javascript
+// Drop-in replacement for `validator` in `players/player.js`
+let validator = (player) => {
+    // Name
+    if (typeof player.name !== 'string' || player.name.trim().length < 2 || player.name.trim().length > 20) {
+        console.log("Name must be a string!");
+        return false;
+    }
+
+    // Avatar: must be a single visible emoji (grapheme), not code-unit length
+    if (typeof player.avatar !== 'string') {
+        console.log("Avatar must be a single unicode emoji character! \nFor windows: 'WIN + <'. \nFor mac: 'CMD + OPT + SPACE'");
+        return false;
+    }
+    const avatar = player.avatar.trim();
+    if (avatar.length === 0) {
+        console.log("Avatar must be a single unicode emoji character! \nFor windows: 'WIN + <'. \nFor mac: 'CMD + OPT + SPACE'");
+        return false;
+    }
+    let isSingleGrapheme = true;
+    try {
+        const seg = new Intl.Segmenter('en', { granularity: 'grapheme' });
+        const clusters = [...seg.segment(avatar)];
+        isSingleGrapheme = clusters.length === 1;
+    } catch {
+        // Fallback: accept non-empty (covers flags/skin tones/ZWJ sequences)
+        isSingleGrapheme = avatar.length > 0;
+    }
+    if (!isSingleGrapheme) {
+        console.log("Avatar must be a single unicode emoji character! \nFor windows: 'WIN + <'. \nFor mac: 'CMD + OPT + SPACE'");
+        return false;
+    }
+
+    // Score
+    if (typeof player.score !== 'number' || isNaN(player.score)) {
+        console.log("Score must be a number!");
+        return false;
+    }
+    if (player.score < 0) {
+        console.log("Score must be a positive number!");
+        return false;
+    }
+
+    // Buzzer
+    if (typeof player.buzzerKey !== 'string' || player.buzzerKey.trim().length === 0) {
+        console.log("Buzzer key must be a string!");
+        return false;
+    }
+
+    return true;
+};
+```
+
+---
+Here’s a minimal, forgiving avatar validation for players/player.js: it keeps avatars as a single grapheme when possible and assigns a random emoji if the input is empty or invalid. It never fails the validation because of the avatar.
+
+```js
+// javascript
+// Drop this near the top of 'players/player.js'
+const EMOJI_POOL = [
+  '😀','😁','😂','🤣','😎','🧐','🤓','🥳','🤖','👾',
+  '🐶','🐱','🦊','🐼','🐨','🐯','🦁','🐸','🐵','🦄',
+  '⚽','🏀','🏈','⚾','🎾','🏐','🎲','🧩','🚀','⭐'
+];
+
+function pickRandomEmoji() {
+  return EMOJI_POOL[Math.floor(Math.random() * EMOJI_POOL.length)];
+}
+
+function ensureAvatar(input) {
+  const s = typeof input === 'string' ? input.trim() : '';
+  if (!s) return pickRandomEmoji();
+
+  // Prefer a single grapheme; fall back to any non-empty string
+  try {
+    const seg = new Intl.Segmenter('en', { granularity: 'grapheme' });
+    const clusters = [...seg.segment(s)];
+    return clusters.length === 1 ? s : pickRandomEmoji();
+  } catch {
+    return s; // Simple fallback without Segmenter
+  }
+}
+
+// Replace the avatar part inside 'validator' with this simplified logic
+let validator = (player) => {
+    // Name
+    if (typeof player.name !== 'string' || player.name.trim().length < 2 || player.name.trim().length > 20) {
+        console.log("Name must be a string!");
+        return false;
+    }
+
+    // Avatar: simple and forgiving; auto-assign on failure
+    player.avatar = ensureAvatar(player.avatar);
+
+    // Score
+    if (typeof player.score !== 'number' || isNaN(player.score)) {
+        console.log("Score must be a number!");
+        return false;
+    }
+    if (player.score < 0) {
+        console.log("Score must be a positive number!");
+        return false;
+    }
+
+    // Buzzer
+    if (typeof player.buzzerKey !== 'string' || player.buzzerKey.trim().length === 0) {
+        console.log("Buzzer key must be a string!");
+        return false;
+    }
+
+    return true;
+};
+
 ```

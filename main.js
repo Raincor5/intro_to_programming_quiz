@@ -6,6 +6,7 @@ const rl = require("readline-sync");
 const quiz = require("./quiz/quiz");
 const delay = require("./quiz/utils/delay");
 const playerScreen = require("./players/playerScreen/playerScreen");
+const highscoresScreen = require("./highscores/highscoresScreen/highscoresScreen");
 
 
 async function main() {
@@ -30,7 +31,7 @@ async function main() {
                 break;
             case "2":
                 console.log("You chose option 2!");
-                // todo: show highscores
+                highscoresScreen();
                 break;
             case "3":
                 console.log("You chose option 3!");
