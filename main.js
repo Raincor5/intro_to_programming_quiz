@@ -13,29 +13,31 @@ async function main() {
     let isRunning = true;
     while (isRunning) {
         console.clear();
-        console.log("Welcome to the Quiz Game!");
+        console.log(cl.cyan(cl.bold("╔════════════════════════════╗")));
+        console.log(cl.cyan(cl.bold("║  WELCOME TO QUIZ GAME!    ║")));
+        console.log(cl.cyan(cl.bold("╚════════════════════════════╝")));
         // MENU
         await delay(1000);
-        console.log("1. Start Quiz");
+        console.log(cl.yellow("1. ") + "Start Quiz");
         await delay(1000);
-        console.log("2. Show Highscores");
+        console.log(cl.yellow("2. ") + "Show Highscores");
         await delay(1000);
-        console.log("3. Manage Players");
+        console.log(cl.yellow("3. ") + "Manage Players");
         await delay(1000);
-        console.log("Q. Exit");
+        console.log(cl.gray("Q. ") + "Exit");
 
         let answer = rl.question("Choose the option:");
         switch (answer) {
             case "1":
-                console.log("You chose option 1!");
+                console.log(cl.green("✓ Starting quiz..."));
                 await quiz();
                 break;
             case "2":
-                console.log("You chose option 2!");
+                console.log(cl.green("✓ Showing highscores..."));
                 highscoresScreen();
                 break;
             case "3":
-                console.log("You chose option 3!");
+                console.log(cl.green("✓ Showing player manager..."));
                 playerScreen();
                 break;
             default:

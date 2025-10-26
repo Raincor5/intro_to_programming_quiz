@@ -1,4 +1,5 @@
 const rl = require("readline-sync");
+const cl = require("colorette");
 const {addPlayerOption} = require("./options/addPlayer");
 const showPlayersOption = require("./options/showPlayersOption");
 const editPlayerOption = require("./options/editPlayerScreen");
@@ -7,9 +8,9 @@ async function playerScreen() {
     let isRunning = true;
     while (isRunning) {
         console.clear();
-        console.log("Player Manager");
+        console.log(cl.cyan(cl.bold("PLAYER MANAGER")));
         let options = ["Add Player", "Show Players", "Edit player", "Exit"];
-        options.forEach((option, index) => console.log(`${index+1}. ` + option));
+        options.forEach((option, index) => console.log(cl.yellow(`${index+1}. `) + option));
         let answer = rl.question("Choose an option: ");
         answer = parseInt(answer);
         switch (answer) {
@@ -26,7 +27,7 @@ async function playerScreen() {
                 isRunning = false;
                 break;
             default:
-                console.log("Invalid option. Please try again.");
+                console.log(cl.red("✗ Invalid option. Please try again."));
                 break;
         }
     }

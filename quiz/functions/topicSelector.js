@@ -2,16 +2,17 @@ const {getAvailableTopics} = require("../utils/checkUsed");
 const {getTopicByLevel} = require("../../data/dataManager");
 const data = require("../../data/data");
 const {question} = require("readline-sync");
+const cl = require('colorette');
 
 let topicSelector =  (originalLevelIndex) => {
     console.clear();
     while (true) {
         let availableTopics = getAvailableTopics(data, originalLevelIndex);
-        availableTopics.forEach((topic, index) => console.log(`${index+1}. ` + topic));
+        availableTopics.forEach((topic, index) => console.log(cl.yellow(`${index+1}. `) + topic));
         let topic = question("Choose a topic: ");
         topic = parseInt(topic);
         if (topic < 1 || topic > availableTopics.length || isNaN(topic)) {
-            console.log("Invalid topic selected. Please try again.");
+            console.log(cl.red("✗ Invalid topic selected. Please try again."));
             continue;
         }
         let selectedTopic = availableTopics[topic-1];

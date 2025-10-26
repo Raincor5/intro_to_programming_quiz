@@ -1,16 +1,16 @@
 
 const data = require("../../data/data");
-const rl = require("readline-sync");
 const {getAvailableQuestions} = require("../utils/checkUsed");
 const getRandomNumber = require("../utils/getRNG");
 const {getQuestionsByTopic} = require("../../data/dataManager");
+const cl = require('colorette');
 
 let questionSelector = (originalLevelIndex, originalTopicIndex, selectedTopic) => {
     console.clear();
     let availableQuestions = getAvailableQuestions(data, originalLevelIndex, originalTopicIndex);
     let randomQuestionIndex = getRandomNumber(0, availableQuestions.length - 1);
     let randomQuestion = availableQuestions[randomQuestionIndex];
-    console.log(randomQuestion);
+    console.log(cl.cyan(cl.bold("❓ " + randomQuestion)));
 
     // Find the original index in the full questions array
     let allQuestionsForTopic = getQuestionsByTopic(data, selectedTopic);

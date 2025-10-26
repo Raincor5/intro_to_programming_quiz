@@ -1,6 +1,7 @@
 const {getAllLevels} = require("../data/dataManager");
 const data = require("../data/data");
 const rl = require("readline-sync");
+const cl = require("colorette");
 let players = [];
 
 
@@ -35,19 +36,19 @@ function ensureAvatar(input) {
 let validator = (player) => {
     // Type validation
     if (typeof player.name !== 'string' || player.name.trim().length < 2 || player.name.trim().length > 20) {
-        console.log("Name must be a string!");
+        console.log(cl.red("✗ Name must be a string!"));
         return false;
     }
 
     player.avatar = ensureAvatar(player.avatar);
 
     if (typeof player.score !== 'number' || isNaN(player.score)) {
-        console.log("Score must be a number!");
+        console.log(cl.red("✗ Score must be a number!"));
         return false;
     }
 
     if (typeof player.buzzerKey !== 'string' || player.buzzerKey.trim().length === 0) {
-        console.log("Buzzer key must be a string!");
+        console.log(cl.red("✗ Name must be a string!"));
         return false;
     }
 
@@ -70,16 +71,16 @@ let addPlayer = (name, avatar, score, buzzerKey) => {
     }
     let validate = validator(playerConstructor);
     if (!validate) {
-        console.log("Invalid player data!");
+        console.log(cl.red("✗ Invalid player data!"));
         return false;
     }
     const duplicate = players.find(player => player.name === name || player.buzzerKey === normalizerBuzzer);
     if (duplicate) {
-        console.log("Player with the same name or buzzer key already exists!");
+        console.log(cl.red("✗ Player with the same name or buzzer key already exists!"));
         return false;
     }
     players.push(playerConstructor);
-    console.log("Player added successfully!");
+    console.log(cl.green("✓ Player added successfully!"));
     return true;
 }
 
@@ -161,7 +162,7 @@ let updatePlayerBasicInfo = (playerId, name, avatar, score, buzzerKey) => {
     };
     let validate = validator(candidate);
     if (!validate) {
-        console.log("Invalid player data!");
+        console.log(cl.red("✗ Invalid player data!"));
         return false;
     }
 
@@ -181,7 +182,7 @@ let updatePlayerBasicInfo = (playerId, name, avatar, score, buzzerKey) => {
     player.score = nextScore;
     player.buzzerKey = nextBuzzer;
 
-    console.log("Player updated successfully!");
+    console.log(cl.green("✓ Player added successfully!"));
     return true;
 };
 

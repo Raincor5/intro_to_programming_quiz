@@ -1,4 +1,5 @@
 const rl = require("readline-sync");
+const cl = require("colorette");
 const { addPlayer } = require("../../player");
 
 
@@ -6,14 +7,14 @@ async function addPlayerOption() {
     let isRunning = true;
     while (isRunning) {
         console.clear();
-        console.log("Add Player");
+        console.log(cl.cyan(cl.bold("ADD PLAYER")));
         const helpString1 = " To open emoji picker, press Ctrl + Alt + < on Windows 10+,\n";
         let helpString2 =  "or Control + Cmd + Space on macOS."
         const numOfSpaces = (helpString1.length - helpString2.length) / 2;
         let helpString2WithSpaces = " ".repeat(numOfSpaces) + helpString2;
-        console.log("=".repeat(helpString1.length));
+        console.log(cl.gray("=".repeat(helpString1.length)));
         console.log(helpString1 + helpString2WithSpaces);
-        console.log("=".repeat(helpString1.length));
+        console.log(cl.gray("=".repeat(helpString1.length)));
         let name = rl.question("Enter player name: ");
         let avatar = rl.question("Enter player avatar: ");
         let score = rl.question("Enter initial player score, in case of a handicap (leave blank for 0): ");
@@ -31,7 +32,7 @@ async function addPlayerOption() {
                 break;
             }
         } else {
-            console.log("Player not added. Please try again.");
+            console.log(cl.red("✗ Player not added. Please try again."));
         }
     }
 

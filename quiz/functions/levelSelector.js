@@ -1,6 +1,7 @@
 const {getAvailableLevels} = require("../utils/checkUsed");
 const data = require("../../data/data");
 const rl = require("readline-sync");
+const cl = require("colorette");
 const {getAllLevels} = require("../../data/dataManager");
 
 let levelSelector =  () => {
@@ -8,15 +9,15 @@ let levelSelector =  () => {
     let quitCheck = false;
     while (true) {
         let availableLevels = getAvailableLevels(data);
-        availableLevels.forEach(((level, index) => console.log(`${index + 1}. ` + level)));
+        availableLevels.forEach(((level, index) => console.log(cl.yellow(`${index + 1}. `) + level)));
         let level = rl.question("Choose a level (q to quit): ");
         if (level === "q" || level === "Q") {
-            console.log("Goodbye!");
+            console.log(cl.cyan("Goodbye! 👋"));
             return [null, null, quitCheck = true];
         }
         level = parseInt(level);
         if (level < 1 || level > availableLevels.length || isNaN(level)) {
-            console.log("Invalid level selected. Please try again.");
+            console.log(cl.red("✗ Invalid level selected. Please try again."));
             continue;
         }
         let selectedLevel = availableLevels[level - 1];
